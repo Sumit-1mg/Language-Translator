@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+     <title>Language Translator</title>
+     <style>
+         body {
+             font-family: Arial, sans-serif;
+             text-align: center;
+             background-color: #f7f7f7;
+             margin: 0;
+             padding: 0;
+         }
+         h1 {
+            margin-top: 30px;
+         }
+         #container {
+             display: flex;
+             justify-content: space-around;
+             margin-top: 50px;
+         }
+         .box {
+             width: 45%;
+             padding: 20px;
+             border: 1px solid #ccc;
+             border-radius: 8px;
+             background-color: #fff;
+        }
+         select {
+             width: 100%;
+             margin-bottom: 10px;
+             padding: 5px;
+             border: 1px solid #ccc;
+             border-radius: 5px;
+         }
+         textarea {
+             width: 100%;
+             height: 200px;
+             padding: 5px;
+             border: 1px solid #ccc;
+             border-radius: 5px;
+         }
+         button {
+             margin-top: 20px;
+             padding: 10px 20px;
+             font-size: 16px;
+             background-color: #4285F4;
+             color: #fff;
+             border: none;
+             border-radius: 5px;
+             cursor: pointer;
+             transition: background-color 0.3s ease;
+         }
+         button:hover {
+            background-color: #2b73c6;
+         }
+         #translated-text {
+            color: #555;
+         }
+         #Error {
+            width: 450px;
+            height: 100px;
+            }
+     </style>
+</head>
+<body>
+ <h1>Language Translator</h1>
+ <div id="container">
+ <div class="box">
+ <h2>Source Language</h2>
+
+ <input style="padding: 10px;" type="text" id="source-language" name="source_language" onkeyup="showSuggestions('source-language','suggestions1','suggestionList1')" required>
+     <div class="suggestions" id="suggestions1">
+    <ul></ul>
+  </div>
+ <textarea id="source-text" placeholder="Enter text to translate..."></textarea>
+ </div>
+ <div class="box">
+ <h2>Target Language</h2>
+
+
+ <input style="padding: 10px;" type="text" id="target-language" name="target_language" onkeyup="showSuggestions('target-language','suggestions2','suggestionList2')" required>
+     <div class="suggestions" id="suggestions2">
+    <ul></ul>
+  </div>
+
+ <textarea id="translated-text" ></textarea>
+ </div>
+ </div>
+
+ <!-- Add onClick event to call sendFormData function with the corresponding route -->
+ <button id="submit-btn" onclick="sendFormData('/rapid_api')">Translate Using Rapid API</button>
+ <button id="submit-btn" onclick="sendFormData('/lacto_ai_api')">Translate Using Lacto API</button>
+ <button id="submit-btn" onclick="sendFormData('/google_api')">Translate Using Google API</button>
+
+
+ <div class="center-container">
+    <textarea id="Error" style="border: none;"></textarea>
+  </div>
+
+     <script>
+         // JavaScript function to send form data as JSON to the specified route
+         function sendFormData(route) {
+             const sourceLanguage = document.getElementById('source-language').value;
+             const targetLanguage = document.getElementById('target-language').value;
+             const sourceText = document.getElementById('source-text').value;
+             const formData = {
+                 source_language: sourceLanguage,
+                 target_language: targetLanguage,
+                 source_text: sourceText
+             };
+
+             // Create a new XMLHttpRequest
+             const xhr = new XMLHttpRequest();
+             xhr.open('POST', route, true);
+             xhr.setRequestHeader('Content-Type', 'application/json');
+
+             // Define the callback function when the request completes
+             xhr.onload = function() {
+                 if (xhr.status === 200) {
+                     const response = JSON.parse(xhr.responseText);
+                     console.log(response)
+                     if (response.error ==1){
+                        document.getElementById('Error').value = response.error_message;
+                     }
+                     else{
+                        //displayResults(response.data.translatedText)
+                        document.getElementById('translated-text').value = response.target_text;
+                        document.getElementById('source-language').value = response.source_language;
+                        document.getElementById('Error').value = "";
+                     }
+
+                 } else {
+                     document.getElementById('translated-text').value = 'Error occurred while translating.';
+                 }
+             };
+
+             // Convert the form data to JSON and send the request
+             xhr.send(JSON.stringify(formData));
+         }
+         function showSuggestions(field,suggestion_id,suggestion_list) {
+             const text = document.getElementById(field).value;
+             const formData = {
+                 text: text
+             };
+             // Create a new XMLHttpRequest
+             const xhr = new XMLHttpRequest();
+             xhr.open('POST', '/suggestion', true);
+             xhr.setRequestHeader('Content-Type', 'application/json');
+
+             // Define the callback function when the request completes
+             xhr.onload = function() {
+                 if (xhr.status === 200) {
+                     const response = JSON.parse(xhr.responseText);
+                     //console.log(response.data.translatedText)
+                     //displayResults(response.data.translatedText)
+                     //document.getElementById(display_id).value = response.suggestion;
+                     displaySuggestions(response.suggestion,suggestion_id,suggestion_list)
+                 } else {
+                     document.getElementById('translated-text').value = 'Error occurred while translating.';
+                 }
+             };
+
+             // Convert the form data to JSON and send the request
+             xhr.send(JSON.stringify(formData));
+         }
+             function displaySuggestions(suggestions,suggestion_id,suggestion_list) {
+                     const suggestionsContainer = document.getElementById(suggestion_id);
+                  const suggestionList = suggestionsContainer.querySelector("ul");
+                  //const suggestionList = document.getElementById(suggestion_list);
+                  if (suggestions.length === 0) {
+                    suggestionsContainer.style.display = "none";
+                  } else {
+                    suggestionsContainer.style.display = "block";
+                    suggestionList.innerHTML = "";
+
+                    suggestions.forEach((suggestion) => {
+                      const li = document.createElement("li");
+                      li.textContent = suggestion;
+                      suggestionList.appendChild(li);
+                    });
+                  }
+                }
+         function displayResults(data) {
+            console.log(data)
+            document.getElementByID('translated-text').value = data
+         }
+
+     </script>
+</body>
+</html>

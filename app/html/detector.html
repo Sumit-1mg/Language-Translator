@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+     <title>Language Translator</title>
+     <style>
+         body {
+             font-family: Arial, sans-serif;
+             text-align: center;
+             background-color: #f7f7f7;
+             margin: 0;
+             padding: 0;
+         }
+         h1 {
+            margin-top: 30px;
+         }
+         #container {
+             display: flex;
+             justify-content: space-around;
+             margin-top: 50px;
+         }
+         .box {
+             width: 45%;
+             padding: 20px;
+             border: 1px solid #ccc;
+             border-radius: 8px;
+             background-color: #fff;
+        }
+         select {
+             width: 100%;
+             margin-bottom: 10px;
+             padding: 5px;
+             border: 1px solid #ccc;
+             border-radius: 5px;
+         }
+         textarea {
+             width: 100%;
+             height: 200px;
+             padding: 5px;
+             border: 1px solid #ccc;
+             border-radius: 5px;
+         }
+         button {
+             margin-top: 20px;
+             padding: 10px 20px;
+             font-size: 16px;
+             background-color: #4285F4;
+             color: #fff;
+             border: none;
+             border-radius: 5px;
+             cursor: pointer;
+             transition: background-color 0.3s ease;
+         }
+         button:hover {
+            background-color: #2b73c6;
+         }
+         #detected_language {
+            color: #555;
+         }
+         #detected_language {
+            width: 150px;
+            height: 30px;
+            }
+         #Error {
+            width: 450px;
+            height: 100px;
+            }
+     </style>
+</head>
+<body>
+ <h1>Language Detector</h1>
+
+ <div id="container">
+ <div class="box">
+ <textarea id="source-text" placeholder="Enter text to translate..."></textarea>
+ </div>
+ </div>
+ <div>
+<button id="submit-btn" onclick="sendFormData('/detector')">Detect Language</button>
+    <textarea id="detected_language" rows="5" cols="10"></textarea>
+     </div>
+
+<div class="center-container">
+    <textarea id="Error" style="border: none;"></textarea>
+  </div>
+
+
+
+     <script>
+         // JavaScript function to send form data as JSON to the specified route
+         function sendFormData(route) {
+
+             const sourceText = document.getElementById('source-text').value;
+             const formData = {
+                 source_text: sourceText
+             };
+
+             // Create a new XMLHttpRequest
+             const xhr = new XMLHttpRequest();
+             xhr.open('POST', route, true);
+             xhr.setRequestHeader('Content-Type', 'application/json');
+
+             // Define the callback function when the request completes
+             xhr.onload = function() {
+                 if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    //console.log(response)
+                    if(response.error == 0){
+                        document.getElementById('detected_language').value = response.detected_language;
+                    }
+                    else{
+                        document.getElementById('Error').value = response.error_message;
+                    }
+                 } else {
+                     document.getElementById('Error').value = 'Error occurred while connecting API.';
+                 }
+             };
+
+             // Convert the form data to JSON and send the request
+             xhr.send(JSON.stringify(formData));
+         }
+         function displayResults(data) {
+            console.log(data)
+            document.getElementByID('detected_language').value = data
+         }
+     </script>
+</body>
+</html>
