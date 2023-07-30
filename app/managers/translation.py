@@ -4,7 +4,7 @@ from sanic.response import json
 import requests
 from requests_cache import CachedSession
 
-from app.database.database_management import insert_translation_request
+from app.database.database_management import StoreTranslationRequest
 from app.models.request import TranslatorModel
 from app.utils.dotenv_reader import google_api_key, lacto_api_key, rapid_api_key
 from app.utils.constant import GOOGLE_URL, LACTO_URL, RAPID_URL
@@ -51,9 +51,9 @@ class Translator:
                 ans['target_text'] = response.get('data').get('translatedText')
 
             if status == 200:
-                insert_translation_request(source_language, target_language, service, True)
+                StoreTranslationRequest.store_translation_request(source_language, target_language, service, True)
             else:
-                insert_translation_request(source_language, target_language, service, False)
+                StoreTranslationRequest.store_translation_request(source_language, target_language, service, False)
 
         except:
             ans['error'] = 1
