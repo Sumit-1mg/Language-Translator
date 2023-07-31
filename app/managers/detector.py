@@ -35,6 +35,11 @@ class Detector:
             code = response.get('data').get('detections')[0][0].get('language')
             ans['detected_language'] = code_to_language.get_language(code)
 
+            try:
+                DetectorResponseModel(**ans)
+            except Exception as e:
+                return {"error": 1, "error_message": str(e)}
+
         except Exception as e:
             ans['error'] = 1
             ans['error_message'] = e

@@ -31,7 +31,6 @@ class StoreTranslationRequest:
         try:
             cls.create_table()
             timestamp = datetime.utcnow()
-            print("path to database",cls.path_to_database)
             with sqlite3.connect(cls.path_to_database) as conn:
 
                 cursor = conn.cursor()
@@ -40,7 +39,6 @@ class StoreTranslationRequest:
                     VALUES (?, ?, ?, ?, ?)
                 ''', (source_language, target_language, api_used, int(translation_success), timestamp))
                 conn.commit()
-            print("data inserted successfully")
 
         except Exception as e:
-            print("Error while inserting data in database", str(e))
+            print("Error: ", str(e))

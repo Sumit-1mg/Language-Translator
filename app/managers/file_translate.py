@@ -4,6 +4,7 @@ from pydantic import ValidationError
 from sanic import json
 
 from app.models.request import FileTranslatorModel
+from app.models.response import FileTranslatorResponseModel
 from app.utils.dotenv_reader import google_api_key
 from app.utils.constant import GOOGLE_URL
 from app.utils.language_code import LanguageCodeHandler
@@ -92,4 +93,10 @@ class File_translator:
         with open(output_file, 'w') as file:
             file.write(translated_text)
         ans['output_file'] = output_file
+
+        try:
+            FileTranslatorResponseModel(**ans)
+        except Exception as e:
+            return {"error": 1, "error_message": str(e)}
+
         return ans

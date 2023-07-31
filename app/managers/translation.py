@@ -1,8 +1,6 @@
 import aiohttp
-from pydantic import ValidationError
-from sanic.response import json
-import requests
-from requests_cache import CachedSession
+import time
+from aiohttp_client_cache import CachedSession, SQLiteBackend
 
 from app.database.database_management import StoreTranslationRequest
 from app.models.request import TranslatorModel
@@ -14,7 +12,7 @@ from app.utils.input_validator import InputValidator
 
 
 class Translator:
-    TIMEOUT = 5  # in seconds
+    TIMEOUT = 5 # in seconds
 
     @classmethod
     async def translate(cls, request_data, service):
@@ -23,8 +21,6 @@ class Translator:
             TranslatorModel(**request_data)
         except Exception as e:
             return {"error": 1, "error_message": str(e)}
-
-        print(request_data)
 
         validate = InputValidator()
         validation_response = validate.validate(request_data)
@@ -53,14 +49,20 @@ class Translator:
                                                                   target_lang=target_language)
                 ans['target_text'] = response.get('data').get('translatedText')
 
+            try:
+                TranslatorResponseModel(**ans)
+            except Exception as e:
+                return {"error": 1, "error_message": str(e)}
+
             if status == 200:
                 StoreTranslationRequest.store_translation_request(source_language, target_language, service, True)
             else:
                 StoreTranslationRequest.store_translation_request(source_language, target_language, service, False)
 
-        except:
+        except Exception as e:
             ans['error'] = 1
             ans['error_message'] = 'Cannot able to translate'
+
 
         return ans
 
@@ -104,11 +106,13 @@ class Translator:
         result = await cls._make_post(url=RAPID_URL, headers=headers, data=data)
         return result
 
+
     @classmethod
     async def _make_post(cls, url, data=None, params=None, headers=None):
         timeout = aiohttp.ClientTimeout(total=cls.TIMEOUT)
-        async with aiohttp.ClientSession(timeout=timeout) as session:
-            async with session.post(url=url, headers=headers, data=data, params=params) as res:
+        async with CachedSession(cache=SQLiteBackend('cache', allowed_methods=('GET', 'POST')),
+                                 allowable_methods=['GET', 'POST']) as session:
+            async with session.post(url=url, headers=headers, params=params, data=data, timeout=timeout) as res:
                 status = res.status
                 content = await res.json()
                 return content, status
