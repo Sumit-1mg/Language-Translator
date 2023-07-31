@@ -7,29 +7,20 @@ class APIRecommendation:
     path_to_database = os.getcwd() + '/database.db'
 
     @classmethod
-    def execute_query(cls, query):
-        connection = sqlite3.connect(cls.path_to_database)
-        cursor = connection.cursor()
-        cursor.execute(query)
-        result = cursor.fetchall()
-        cursor.close()
-        connection.close()
-        return result
-
-    @classmethod
     def calculate_success_rate(cls):
         try:
-            # Connect to the SQLite database.
-            connection = sqlite3.connect(cls.path_to_database)
-            cursor = connection.cursor()
-
-            # Define dictionaries to store the total attempts and successful attempts for each API.
             api_total_attempts = {'google': 0, 'lacto': 0, 'rapid': 0}
             api_successful_attempts = {'google': 0, 'lacto': 0, 'rapid': 0}
 
-            # Fetch data from the database and update the dictionaries accordingly.
-            query = "SELECT api_used, translation_success FROM translation_requests WHERE timestamp >= DATETIME('now', '-1 hour');"
-            result = cls.execute_query(query)
+            with sqlite3.connect(cls.path_to_database) as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    SELECT api_used, translation_success FROM translation_requests WHERE timestamp >= DATETIME('now', '-1 hour')
+                    '''
+                )
+                result=cursor.fetchall()
+                conn.commit()
+
             for row in result:
                 api, success = row
                 if api in api_total_attempts:
@@ -46,11 +37,14 @@ class APIRecommendation:
                                                                                                'rapid'] != 0 else 0
             }
 
-            # Close the database connection.
-            cursor.close()
-            connection.close()
+            highest_success_rate_api = "google"
+            max_success=api_success_rates['google']
 
-            highest_success_rate_api = max(api_success_rates, key=api_success_rates.get)
+            for key, value in api_success_rates.items():
+                if value > max_success:
+                    max_success = value
+                    highest_success_rate_api = key
+
             response = {'api': "{}".format(highest_success_rate_api.title())}
             return response
         except Exception as e:
