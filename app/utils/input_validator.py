@@ -7,6 +7,12 @@ class InputValidator:
         pass
 
     def validate(self, request_data):
+        '''
+        In this Function we validate weather source language and target language supported by api or not and soouce
+        language entered by used matched with detected language of given text
+        :param request_data:
+        :return: ans
+        '''
         ans = {'error': 0}
 
         source_language = request_data.get("source_language").lower().strip()

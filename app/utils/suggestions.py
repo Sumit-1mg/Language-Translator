@@ -6,6 +6,11 @@ class Suggestions:
         pass
 
     def suggestion_handler(self, request_data):
+        '''
+         Generate language suggestions based on the provided target_string.
+        :param request_data -> dict : A dictionary containing the 'text' field, representing the target_string for which language suggestions are to be generated.
+        :return: dict: A dictionary containing the 'suggestion' field, which is a list of language suggestions.
+        '''
         suggestions = []
 
         target_string = request_data.get('text')

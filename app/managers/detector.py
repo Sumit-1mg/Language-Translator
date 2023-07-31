@@ -3,6 +3,7 @@ from pydantic import ValidationError
 from sanic import json
 
 from app.models.request import DetectorModel
+from app.models.response import DetectorResponseModel
 from app.utils.dotenv_reader import google_api_key
 from app.utils.constant import GOOGLE_URL
 from app.utils.language_code import LanguageCodeHandler
@@ -34,8 +35,9 @@ class Detector:
             code = response.get('data').get('detections')[0][0].get('language')
             ans['detected_language'] = code_to_language.get_language(code)
 
-
         except Exception as e:
             ans['error'] = 1
             ans['error_message'] = e
+
+
         return ans

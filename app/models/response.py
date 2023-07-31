@@ -1,17 +1,35 @@
+from typing import Union
+
 from pydantic import BaseModel
 
 
-class TranslatorModelResponse(BaseModel):
-    error: int
-    source_language: str
-    target_text: str
+class ErrorResponse(BaseModel):
+    error: int = 1
+    error_message: str
 
 
-class DetectorModelResponse(BaseModel):
-    error: int
+class TranslatorSuccessResponse(BaseModel):
+    error: int = 0
+    translated_text: str
+
+
+class TranslatorResponseModel(BaseModel):
+    response: Union[TranslatorSuccessResponse, ErrorResponse]
+
+
+class DetectorSuccessResponse(BaseModel):
+    error: int = 0
     detected_language: str
 
 
-class FileTranslatorModelResponse(BaseModel):
-    error: int
+class DetectorResponseModel(BaseModel):
+    response: Union[DetectorSuccessResponse, ErrorResponse]
+
+
+class FileTranslatorSuccessResponse(BaseModel):
+    error: int = 0
     output_file: str
+
+
+class FileTranslatorResponseModel(BaseModel):
+    response: Union[DetectorSuccessResponse, ErrorResponse]

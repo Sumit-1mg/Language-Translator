@@ -6,7 +6,7 @@ from requests_cache import CachedSession
 
 from app.database.database_management import StoreTranslationRequest
 from app.models.request import TranslatorModel
-from app.models.response import FileTranslatorModelResponse
+from app.models.response import TranslatorResponseModel
 from app.utils.dotenv_reader import google_api_key, lacto_api_key, rapid_api_key
 from app.utils.constant import GOOGLE_URL, LACTO_URL, RAPID_URL
 from app.utils.language_code import LanguageCodeHandler

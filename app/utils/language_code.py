@@ -137,16 +137,31 @@ class LanguageCodeHandler:
                 'zulu': 'zu'}
 
     def get_code(self,language):
+        '''
+        if we give language name then it will return the language code
+        '''
         return self.language_code[language.strip().lower()]
 
     def get_language(self,code):
+        '''
+        if we give language code then it will return the language name.
+        '''
         code_lang = {v: k for k, v in self.language_code.items()}
         language = code_lang[code]
         return language[0].upper() + language[1:]
 
     def is_valid_language(self,language):
-            return language.strip().lower() in set(self.language_code.keys())
+        '''
+        Validate whether the given language is in the list of supported languages.
+        Parameters:
+        language (str): The language to be checked.
+        Returns: bool: True if the language is supported, False otherwise.
+        '''
+        return language.strip().lower() in set(self.language_code.keys())
 
     def get_all_language(self):
-            return self.language_code
+        '''
+        return the dictionary in which all language names and there codes are stored.
+        '''
+        return self.language_code
 

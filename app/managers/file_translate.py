@@ -16,6 +16,15 @@ class File_translator:
         self.url = GOOGLE_URL
 
     def split_text_into_chunks(self, text, chunk_size):
+        '''
+        Split the given text into chunks of the specified chunk_size.
+        :param
+        text (str): The input text to be split into chunks.
+        chunk_size (int): The maximum size of each chunk.
+        :return:
+        List[str]: A list of text chunks, where each chunk has a maximum size of chunk_size.
+        '''
+
         chunks = []
         current_chunk = ""
 
@@ -51,6 +60,7 @@ class File_translator:
             return translated_text
 
     async def translate_file(self, request_data):
+
         try:
             FileTranslatorModel(**request_data)
         except ValidationError as e:
