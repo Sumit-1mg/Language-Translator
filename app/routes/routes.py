@@ -10,31 +10,18 @@ from app.managers.file_translate import File_translator
 
 from app.utils.constant import GOOGLE_URL
 from app.utils.dotenv_reader import google_api_key
+from app.utils.is_api_available import IsApiAvailable
 from app.utils.suggestions import Suggestions
 from app.database.api_recommendation import APIRecommendation
 
 app = Sanic("Translator")
 
 
-async def is_google_translation_api_available():
-    try:
-        params = {
-            "q": "hello",
-            "target": "hi",
-            "key": google_api_key,
-        }
-        session = CachedSession(cache_name='cache', allowable_methods=['GET', 'POST'], expire_after=86400)
-        session.post(GOOGLE_URL, params=params, timeout=5)
-        return True
-    except:
-        return False
-
-
 # Before server start listener
 @app.listener("before_server_start")
 async def check_api_availability(app, loop):
     print("Checking Translator API availability...")
-    api_available = await is_google_translation_api_available()
+    api_available = await IsApiAvailable.is_api_available()
     if not api_available:
         raise Exception("Translator API is not available. Server cannot start.")
     print("Translator API is available. Starting the server.")
