@@ -54,7 +54,7 @@ class File_translator:
         try:
             FileTranslatorModel(**request_data)
         except ValidationError as e:
-            return json({"error": "Validation failed", "detail": str(e)}, status=400)
+            return {"error": 1, "error_message": str(e)}
 
         input_file = request_data['input_file']
         output_language = request_data['output_language']

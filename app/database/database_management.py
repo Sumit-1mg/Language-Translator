@@ -4,12 +4,13 @@ from datetime import datetime
 
 class StoreTranslationRequest:
 
-    DATABASE_FILE = os.getcwd() + "/database.db"
+    #path_to_database = os.path.dirname(os.path.dirname(os.getcwd()))+'/database.db'
+    path_to_database = os.getcwd() + '/database.db'
 
     @classmethod
     def create_table(cls):
         # Connect to the database and create the 'translation_requests' table if it doesn't exist
-        with sqlite3.connect(cls.DATABASE_FILE) as conn:
+        with sqlite3.connect(cls.path_to_database) as conn:
             cursor = conn.cursor()
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS translation_requests (
@@ -30,7 +31,8 @@ class StoreTranslationRequest:
         try:
             cls.create_table()
             timestamp = datetime.utcnow()
-            with sqlite3.connect(cls.DATABASE_FILE) as conn:
+            print("path to database",cls.path_to_database)
+            with sqlite3.connect(cls.path_to_database) as conn:
 
                 cursor = conn.cursor()
                 cursor.execute('''

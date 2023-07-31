@@ -18,7 +18,7 @@ class Detector:
         try:
             DetectorModel(**request_data)
         except ValidationError as e:
-            return json({"error": "Validation failed", "detail": str(e)}, status=400)
+            return {"error": 1, "error_message": str(e)}
 
         ans = {'error': 0}
         try:

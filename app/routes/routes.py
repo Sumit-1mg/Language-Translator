@@ -11,6 +11,7 @@ from app.managers.file_translate import File_translator
 from app.utils.constant import GOOGLE_URL
 from app.utils.dotenv_reader import google_api_key
 from app.utils.suggestions import Suggestions
+from app.database.api_recommendation import APIRecommendation
 
 app = Sanic("Translator")
 
@@ -32,21 +33,11 @@ async def is_google_translation_api_available():
 # Before server start listener
 @app.listener("before_server_start")
 async def check_api_availability(app, loop):
-    print("Checking Google Translator API availability...")
+    print("Checking Translator API availability...")
     api_available = await is_google_translation_api_available()
     if not api_available:
-        raise Exception("Google Translator API is not available. Server cannot start.")
-    print("Google Translator API is available. Starting the server.")
-
-
-'''
-If the check_google_translator_api function returns False, indicating that the Google Translator API is not 
-available, the check_api_availability listener raises an exception with the message "Google Translator API is not 
-available. Server cannot start." 
-Since this exception is raised during the before_server_start event, Sanic will 
-catch it internally, log the exception, and prevent the server from starting. The server will not proceed to the 
-normal running state, and the application will terminate.
-'''
+        raise Exception("Translator API is not available. Server cannot start.")
+    print("Translator API is available. Starting the server.")
 
 
 @app.route('/')
@@ -109,3 +100,12 @@ async def suggest(request):
     obj = Suggestions()
     suggestion_list = obj.suggestion_handler(request_data)
     return json(suggestion_list)
+
+
+@app.get('/recommendations')
+async def recommend_api(request):
+    try:
+        _response = APIRecommendation.calculate_success_rate()
+        return json(_response)
+    except Exception as e:
+        print(str(e))

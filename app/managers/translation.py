@@ -6,6 +6,7 @@ from requests_cache import CachedSession
 
 from app.database.database_management import StoreTranslationRequest
 from app.models.request import TranslatorModel
+from app.models.response import FileTranslatorModelResponse
 from app.utils.dotenv_reader import google_api_key, lacto_api_key, rapid_api_key
 from app.utils.constant import GOOGLE_URL, LACTO_URL, RAPID_URL
 from app.utils.language_code import LanguageCodeHandler
@@ -13,15 +14,17 @@ from app.utils.input_validator import InputValidator
 
 
 class Translator:
-    TIMEOUT = 60  # in seconds
+    TIMEOUT = 5  # in seconds
 
     @classmethod
     async def translate(cls, request_data, service):
 
         try:
             TranslatorModel(**request_data)
-        except ValidationError as e:
-            return json({"error": "Validation failed", "detail": str(e)}, status=400)
+        except Exception as e:
+            return {"error": 1, "error_message": str(e)}
+
+        print(request_data)
 
         validate = InputValidator()
         validation_response = validate.validate(request_data)
