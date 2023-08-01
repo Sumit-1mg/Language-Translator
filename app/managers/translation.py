@@ -1,7 +1,6 @@
-import aiohttp
-import time
-from aiohttp_client_cache import CachedSession, SQLiteBackend
+import asyncio
 
+from aiohttp_client_cache import CachedSession, SQLiteBackend
 from app.database.save_response import StoreTranslationResponse
 from app.managers.detector import Detector
 from app.models.request import TranslatorModel
@@ -12,7 +11,7 @@ from app.utils.language_code import LanguageCodeHandler
 
 
 class Translator:
-    TIMEOUT = 5  # in seconds
+    TIMEOUT = 5 # in seconds
 
     @classmethod
     async def translate(cls, request_data, service):
@@ -24,7 +23,7 @@ class Translator:
         except Exception as e:
             return {"error": 1, "error_message": str(e)}
 
-        ans = {'error':0,'source_language': request_data['source_language']}
+        ans = {'error': 0, 'source_language': request_data['source_language']}
         source_language = request_data.get("source_language").lower().strip()
         source_language_detector = Detector()
         _detected_language = source_language_detector.api_call(request_data)
@@ -65,8 +64,10 @@ class Translator:
                 StoreTranslationResponse.store_translation_request(source_language, target_language, service, True)
             else:
                 StoreTranslationResponse.store_translation_request(source_language, target_language, service, False)
-
-        except Exception as e:
+        except asyncio.TimeoutError:
+            ans['error']=1
+            ans['error_message']= "Timeout Error"
+        except:
             ans['error'] = 1
             ans['error_message'] = 'Cannot able to translate'
 
@@ -114,10 +115,10 @@ class Translator:
 
     @classmethod
     async def _make_post(cls, url, data=None, params=None, headers=None):
-        timeout = aiohttp.ClientTimeout(total=cls.TIMEOUT)
         async with CachedSession(cache=SQLiteBackend('cache', allowed_methods=('GET', 'POST')),
                                  allowable_methods=['GET', 'POST']) as session:
-            async with session.post(url=url, headers=headers, params=params, data=data, timeout=timeout) as res:
+            async with session.post(url=url, headers=headers, params=params, data=data, timeout=cls.TIMEOUT) as res:
                 status = res.status
                 content = await res.json()
                 return content, status
+
