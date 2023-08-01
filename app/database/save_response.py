@@ -2,7 +2,7 @@ import os
 import sqlite3
 from datetime import datetime
 
-class StoreTranslationRequest:
+class StoreTranslationResponse:
 
     #path_to_database = os.path.dirname(os.path.dirname(os.getcwd()))+'/database.db'
     path_to_database = os.getcwd() + '/database.db'

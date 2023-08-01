@@ -2,34 +2,41 @@ import aiohttp
 import time
 from aiohttp_client_cache import CachedSession, SQLiteBackend
 
-from app.database.database_management import StoreTranslationRequest
+from app.database.save_response import StoreTranslationResponse
+from app.managers.detector import Detector
 from app.models.request import TranslatorModel
 from app.models.response import TranslatorResponseModel
 from app.utils.dotenv_reader import google_api_key, lacto_api_key, rapid_api_key
 from app.utils.constant import GOOGLE_URL, LACTO_URL, RAPID_URL
 from app.utils.language_code import LanguageCodeHandler
-from app.utils.input_validator import InputValidator
 
 
 class Translator:
-    TIMEOUT = 5 # in seconds
+    TIMEOUT = 5  # in seconds
 
     @classmethod
     async def translate(cls, request_data, service):
 
         try:
             TranslatorModel(**request_data)
+        except ValueError as v:
+            return {"error": 1, "error_message": str(v)}
         except Exception as e:
             return {"error": 1, "error_message": str(e)}
 
-        validate = InputValidator()
-        validation_response = validate.validate(request_data)
-        if validation_response['error']:
-            return validation_response
+        ans = {'error':0,'source_language': request_data['source_language']}
+        source_language = request_data.get("source_language").lower().strip()
+        source_language_detector = Detector()
+        _detected_language = source_language_detector.api_call(request_data)
+        if _detected_language['error']:
+            return _detected_language
+        detected_language = _detected_language['detected_language']
+        if detected_language.lower() != source_language:
+            ans['error'] = 1
+            ans['error_message'] = 'Detected Language doesnot match with Source Language'
+            return ans
 
         language_to_code = LanguageCodeHandler()
-        ans = {'error': 0, 'source_language': request_data.get('source_language')}
-
         source_language = language_to_code.get_code(request_data.get('source_language'))
         target_language = language_to_code.get_code(request_data.get('target_language'))
         text = request_data.get('source_text')
@@ -55,14 +62,13 @@ class Translator:
                 return {"error": 1, "error_message": str(e)}
 
             if status == 200:
-                StoreTranslationRequest.store_translation_request(source_language, target_language, service, True)
+                StoreTranslationResponse.store_translation_request(source_language, target_language, service, True)
             else:
-                StoreTranslationRequest.store_translation_request(source_language, target_language, service, False)
+                StoreTranslationResponse.store_translation_request(source_language, target_language, service, False)
 
         except Exception as e:
             ans['error'] = 1
             ans['error_message'] = 'Cannot able to translate'
-
 
         return ans
 
@@ -105,7 +111,6 @@ class Translator:
         }
         result = await cls._make_post(url=RAPID_URL, headers=headers, data=data)
         return result
-
 
     @classmethod
     async def _make_post(cls, url, data=None, params=None, headers=None):
