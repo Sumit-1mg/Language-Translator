@@ -1,9 +1,8 @@
 import requests
 from pydantic import ValidationError
-from sanic import json
 
-from app.models.request import DetectorModel
-from app.models.response import DetectorResponseModel
+from app.validators.request import DetectorModel
+from app.validators.response import DetectorResponseModel
 from app.utils.dotenv_reader import google_api_key
 from app.utils.constant import GOOGLE_URL
 from app.utils.language_code import LanguageCodeHandler

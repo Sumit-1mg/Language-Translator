@@ -1,10 +1,9 @@
 import asyncio
 import aiohttp
 from pydantic import ValidationError
-from sanic import json
 
-from app.models.request import FileTranslatorModel
-from app.models.response import FileTranslatorResponseModel
+from app.validators.request import FileTranslatorModel
+from app.validators.response import FileTranslatorResponseModel
 from app.utils.dotenv_reader import google_api_key
 from app.utils.constant import GOOGLE_URL
 from app.utils.language_code import LanguageCodeHandler
