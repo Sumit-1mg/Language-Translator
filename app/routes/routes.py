@@ -1,21 +1,20 @@
 import os
-from requests_cache import CachedSession
 from sanic import Sanic
 from sanic import response
 from sanic.response import json
-
+from sqlalchemy.ext.asyncio import create_async_engine
 from app.managers.detector import Detector
 from app.managers.translation import Translator
 from app.managers.file_translate import File_translator
-
-from app.utils.constant import GOOGLE_URL
-from app.utils.dotenv_reader import google_api_key
+from app.models.model import Recommendation
 from app.utils.is_api_available import IsApiAvailable
 from app.utils.suggestions import Suggestions
 from app.database.api_recommendation import APIRecommendation
 
+
 app = Sanic("Translator")
 
+bind = create_async_engine("sqlite+aiosqlite:///database.db", echo=True, future=True)
 
 # Before server start listener
 @app.listener("before_server_start")
@@ -92,7 +91,7 @@ async def suggest(request):
 @app.get('/recommendations')
 async def recommend_api(request):
     try:
-        _response = APIRecommendation.calculate_success_rate()
+        _response = Recommendation.highest_success_api()
         return json(_response)
     except Exception as e:
         print(str(e))

@@ -1,7 +1,7 @@
 import asyncio
 
 from aiohttp_client_cache import CachedSession, SQLiteBackend
-
+from app.models.model import SaveResponse
 from app.database.save_response import StoreTranslationResponse
 from app.validators.request import TranslatorModel
 from app.validators.response import TranslatorResponseModel
@@ -15,7 +15,6 @@ class Translator:
 
     @classmethod
     async def translate(cls, request_data, service):
-
         try:
             TranslatorModel(**request_data)
         except ValueError as msg:
@@ -39,23 +38,12 @@ class Translator:
             except Exception as e:
                 return {"error": 1, "error_message": str(e)}
 
-            #from save_response import save_response
-            if status == 200:
-                StoreTranslationResponse.store_translation_request(source_language, target_language, service, True)
-                # await save_response(
-                #     {'source_language': source_language, 'target_language': target_language, 'api_used': service,
-                #      'translation_success': True})
-            else:
-                StoreTranslationResponse.store_translation_request(source_language, target_language, service, False)
-                # await save_response(
-                #     {'source_language': source_language, 'target_language': target_language, 'api_used': service,
-                #      'translation_success': True})
+            SaveResponse.save(source_language, target_language, service, int(True)) if status == 200 else SaveResponse.save(source_language, target_language, service, int(False))
 
         except asyncio.TimeoutError:
             ans['error'] = 1
             ans['error_message'] = "Timeout Error"
         except Exception as e:
-            print("exception ", str(e))
             ans['error'] = 1
             ans['error_message'] = 'Cannot able to translate'
 
