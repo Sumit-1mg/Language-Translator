@@ -3,7 +3,6 @@ import sqlite3
 
 
 class APIRecommendation:
-    #path_to_database = os.path.dirname(os.path.dirname(os.getcwd())) + '/database.db'
     path_to_database = os.getcwd() + '/database.db'
 
     @classmethod

@@ -1,13 +1,11 @@
 import asyncio
-
 from aiohttp_client_cache import CachedSession, SQLiteBackend
-from app.models.model import SaveResponse
-from app.database.save_response import StoreTranslationResponse
 from app.validators.request import TranslatorModel
 from app.validators.response import TranslatorResponseModel
 from app.utils.dotenv_reader import google_api_key, lacto_api_key, rapid_api_key
 from app.utils.constant import GOOGLE_URL, LACTO_URL, RAPID_URL
 from app.utils.language_code import LanguageCodeHandler
+from app.models.save_response import SaveResponse
 
 
 class Translator:
@@ -38,7 +36,8 @@ class Translator:
             except Exception as e:
                 return {"error": 1, "error_message": str(e)}
 
-            SaveResponse.save(source_language, target_language, service, int(True)) if status == 200 else SaveResponse.save(source_language, target_language, service, int(False))
+            #SaveResponse.save(source_language, target_language, service, int(True)) if status == 200 else SaveResponse.save(source_language, target_language, service, int(False))
+            await SaveResponse.save_translation_request(source_language, target_language, service, int(True)) if status ==200 else await SaveResponse.save_translation_request(source_language, target_language, service, int(False))
 
         except asyncio.TimeoutError:
             ans['error'] = 1

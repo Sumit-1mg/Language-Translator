@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.models.model import Response
+from app.SQLAlchemy.model import Response
 
 class Recommendation:
     @classmethod
