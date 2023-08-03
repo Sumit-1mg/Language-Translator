@@ -6,15 +6,11 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from app.managers.detector import Detector
 from app.managers.translation import Translator
 from app.managers.file_translate import File_translator
-from app.models.model import Recommendation
+from app.models.recomendation_model import Recommendation
 from app.utils.is_api_available import IsApiAvailable
 from app.utils.suggestions import Suggestions
-from app.database.api_recommendation import APIRecommendation
-
 
 app = Sanic("Translator")
-
-bind = create_async_engine("sqlite+aiosqlite:///database.db", echo=True, future=True)
 
 # Before server start listener
 @app.listener("before_server_start")
@@ -24,7 +20,6 @@ async def check_api_availability(app, loop):
     if not api_available:
         raise Exception("Translator API is not available. Server cannot start.")
     print("Translator API is available. Starting the server.")
-
 
 @app.route('/')
 async def index(request):
@@ -95,3 +90,4 @@ async def recommend_api(request):
         return json(_response)
     except Exception as e:
         print(str(e))
+

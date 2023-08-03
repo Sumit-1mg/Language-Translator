@@ -45,7 +45,7 @@ class Translator:
             ans['error_message'] = "Timeout Error"
         except Exception as e:
             ans['error'] = 1
-            ans['error_message'] = 'Cannot able to translate'
+            ans['error_message'] = str(e)
 
         return ans
 
